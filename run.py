@@ -1,6 +1,4 @@
 from asyncio import gather
-from itertools import count
-from unittest import result
 from flask import Flask, render_template, jsonify, request
 from flask_pymongo import PyMongo
 from flask_cors import CORS, cross_origin
@@ -8,42 +6,28 @@ from flask_cors import CORS, cross_origin
 import json
 import copy
 import warnings
-import re
-import random
 import math  
 import pandas as pd 
 import numpy as np
-import multiprocessing
-from operator import itemgetter
-from rulelist import RuleList
 import umap
-import bisect
 
 from scipy.linalg import orthogonal_procrustes
 from joblib import Memory
 from joblib import Parallel, delayed
 
 from sklearn import preprocessing
-from bayes_opt import BayesianOptimization
 from sklearn.model_selection import cross_validate
-from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import accuracy_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.neighbors import NearestNeighbors
 from kneed import KneeLocator
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from interpret.glassbox import ExplainableBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
-from sklearn import tree
-from sklearn.pipeline import Pipeline
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.tree import _tree
-from sklearn.ensemble import ExtraTreesClassifier, AdaBoostClassifier
+from sklearn.ensemble import AdaBoostClassifier
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.linear_model import LogisticRegression
 
 from sklearn.cluster import DBSCAN
 
@@ -735,19 +719,7 @@ def executeSearch(keyFlag, keyFlagRule):
             countNumberOfFeatures = 0
             for col in XData.columns:
                 countNumberOfFeatures = countNumberOfFeatures + 1
-            # rootSQ = int(math.sqrt(countNumberOfFeatures))
             ebm = ExplainableBoostingClassifier(random_state=RANDOM_SEED, n_jobs=-1)
-            # n_splits = 3
-            # record = process_model(ebm, 'ebm', XData, yData, n_splits=n_splits)
-            # print(record)
-            # create_global_function()
-            # params = {'n_estimators': (50, 101), 'min_samples_split': (2,11), 'max_depth': (10, 101), 'min_samples_leaf': (1,6), 'max_features': (rootSQ,countNumberOfFeatures+1) }
-            # bayesopt = BayesianOptimization(estimator, params, random_state=RANDOM_SEED)
-            # bayesopt.maximize(init_points=15, n_iter=5, acq='ucb') # 20 and 5
-            # bestParams = bayesopt.max['params']
-            # estimator = RandomForestClassifier(n_estimators=int(bestParams.get('n_estimators')), max_depth=int(bestParams.get('max_depth')), min_samples_leaf=int(bestParams.get('min_samples_leaf')), max_features=int(bestParams.get('max_features')), min_samples_split=int(bestParams.get('min_samples_split')), oob_score=True, random_state=RANDOM_SEED)
-            # paramsRF = {'n_estimators': [int(bestParams.get('n_estimators'))], 'max_depth': [int(bestParams.get('max_depth'))], 'min_samples_leaf': [int(bestParams.get('min_samples_leaf'))], 'max_features': [int(bestParams.get('max_features'))], 'min_samples_split': [int(bestParams.get('min_samples_split'))] }
-            # resultsLocalRF = DecisionTreeComposer(XData, X_train, y_train, X_test, estimator, paramsRF, crossValidation, RANDOM_SEED, roundValueSend) 
             ebm.fit(X_train,y_train)
             global predictions
             predictions = ebm.predict(X_train)
@@ -843,33 +815,6 @@ def executeSearch(keyFlag, keyFlagRule):
             metrics = metrics.filter(['mean_test_accuracy']) 
             parameters = df_cv_results_classifiers.copy()
             parameters = parameters.filter(['param_n_estimators']) 
-            #print(metrics)
-            # parametersPerformancePerModel = pd.DataFrame()
-            # concat parameters and performance
-            # parametersPerformancePerModel = pd.DataFrame(df_cv_results_classifiers['params'])
-            #print(parametersPerformancePerModel)
-            # fit and extract the probabilities
-            #cls_t = randSear.best_estimator_
-            #print(cls_t)
-            # create_global_function()
-            # bayesopt = BayesianOptimization(estimator, params, random_state=RANDOM_SEED)
-            # bayesopt.maximize(init_points=100, n_iter=20, acq='ucb') # 20 and 5
-            # bestParams = bayesopt.max['params']
-            #cls_t = AdaBoostClassifier(n_estimators=int(bestParams.get('n_estimators')), random_state=RANDOM_SEED)
-            # cls_t.fit(X_train, predictions)
-            # gatherRules = []
-            # for tree_idx, est in enumerate(cls_t.estimators_):
-            #     rules = get_rules(est, XData.columns, target_names)
-            #     #print(rules)
-            #     gatherRules.append(rules)
-            #print(len(gatherRules))
-            # for each in gatherRules:
-            #     print(each)
-            #resultsLocalRF = DecisionTreeComposer(XData, X_train, y_train, X_test, cls_t, params, crossValidation, RANDOM_SEED, roundValueSend) 
-            #print(cls_t.score(X_train, predictions))
-            #print(len(gatherRules))
-            # print(gatherRules[0])
-            # print(gatherRules[1])
 
             collectDecisionsPerModel = pd.DataFrame()
             collectDecisions = []
@@ -1562,17 +1507,6 @@ def executeSearch(keyFlag, keyFlagRule):
         valuesHist0List.append(hist0.tolist())
         valuesHist1List.append(hist1.tolist())
 
-
-    # X_trainCopy = X_trainRounded.copy(deep=True)
-    # for i, item in X_trainRounded.iterrows():
-    #     for ind, feat in enumerate(orderedFeatures):
-    #         idx = bisect.bisect_right(perFeatureUnique[ind],item[feat].round(r))-1
-    #         if (item[feat].round(r) == 1):
-    #             store = idx
-    #         else:
-    #             store = idx + 1
-    #         X_trainCopy.loc[i,feat] = store
-
     neighbors = 2
     # X_embedded is your data
     nbrs = NearestNeighbors(n_neighbors=neighbors).fit(DataForUMAP)
@@ -1712,269 +1646,6 @@ def SendEachClassifiersPerformanceToVisualize():
         'y_test': y_test,
     }
     return jsonify(response)
-
-# location = './cachedir'
-# memory = Memory(location, verbose=0)
-
-# @memory.cache
-# def DecisionTreeComposer(XData, X_train, y_train, X_test, clf, params, eachAlgor, AlgorithmsIDsEnd, crossValidation, randomS, RANDOM_SEED, roundValue):
-#     print('insideABNow!!!')
-#     # this is the grid we use to train the models
-#     randSear = GridSearchCV(    
-#         estimator=clf, param_distributions=params, n_iter=randomS,
-#         cv=[(slice(None), slice(None))], refit='accuracy', scoring=scoring,
-#         verbose=0, n_jobs=-1, random_state=RANDOM_SEED)
-
-#     # fit and extract the probabilities
-#     randSear.fit(X_train, y_train)
-
-#     # process the results
-#     cv_results = []
-#     cv_results.append(randSear.cv_results_)
-#     df_cv_results = pd.DataFrame.from_dict(cv_results)
-
-#     number_of_models = []
-#     # number of models stored
-#     number_of_models = len(df_cv_results.iloc[0][0])
-
-#     # initialize results per row
-#     df_cv_results_per_row = []
-
-#     modelsIDs = []
-#     for i in range(number_of_models):
-#         number = AlgorithmsIDsEnd+i
-#         modelsIDs.append(eachAlgor+str(number))
-#         df_cv_results_per_item = []
-#         for column in df_cv_results.iloc[0]:
-#             df_cv_results_per_item.append(column[i])
-#         df_cv_results_per_row.append(df_cv_results_per_item)
-
-#     df_cv_results_classifiers = pd.DataFrame()
-#     # store the results into a pandas dataframe
-#     df_cv_results_classifiers = pd.DataFrame(data = df_cv_results_per_row, columns= df_cv_results.columns)
-
-#     # copy and filter in order to get only the metrics
-#     metrics = df_cv_results_classifiers.copy()
-#     metrics = metrics.filter(['mean_test_accuracy', 'mean_test_precision_macro', 'mean_test_recall_macro',]) 
-
-#     parametersPerformancePerModel = pd.DataFrame()
-#     # concat parameters and performance
-#     parametersPerformancePerModel = pd.DataFrame(df_cv_results_classifiers['params'])
-#     parametersPerformancePerModel = parametersPerformancePerModel.to_json(double_precision=15)
-
-#     parametersLocal = json.loads(parametersPerformancePerModel)['params'].copy()
-#     Models = []
-#     for index, items in enumerate(parametersLocal):
-#         Models.append(str(index))
-
-#     parametersLocalNew = [ parametersLocal[your_key] for your_key in Models ]
-
-#     perModelProb = []
-#     confuseFP = []
-#     confuseFN = []
-#     featureImp = []
-#     collectDecisionsPerModel = pd.DataFrame()
-#     collectDecisions = []
-#     collectDecisionsMod = []
-#     collectLocationsAll = []
-#     collectStatistics = []
-#     collectStatisticsMod = []
-#     collectStatisticsPerModel = []
-#     collectInfoPerModel = []
-#     yPredictTestList = []
-#     perModelPrediction = []
-#     storeTrain = []
-#     storePredict = []
-    
-#     featureNames = []
-#     featureNamesDuplicated = []
-    
-#     for col in XData.columns:
-#         featureNames.append(col)
-#         featureNamesDuplicated.append(col+'_minLim')
-#     for col in XData.columns:
-#         featureNamesDuplicated.append(col+'_maxLim')
-    
-#     counterModels = 1
-#     for eachModelParameters in parametersLocalNew:
-#         collectDecisions = []
-#         collectLocations = []
-#         collectStatistics = []
-#         sumRes = 0
-#         clf.set_params(**eachModelParameters)
-#         np.random.seed(RANDOM_SEED) # seeds
-#         clf.fit(X_train, y_train) 
-#         yPredictTest = clf.predict(X_test)
-#         yPredictTestList.append(yPredictTest)
-
-#         feature_importances = clf.feature_importances_
-#         feature_importances[np.isnan(feature_importances)] = 0
-#         featureImp.append(list(feature_importances))
-
-#         yPredict = cross_val_predict(clf, X_train, y_train, cv=crossValidation)
-#         yPredict = np.nan_to_num(yPredict)
-#         perModelPrediction.append(yPredict)
-
-#         yPredictProb = cross_val_predict(clf, X_train, y_train, cv=crossValidation, method='predict_proba')
-#         yPredictProb = np.nan_to_num(yPredictProb)
-#         perModelProb.append(yPredictProb.tolist())
-
-#         storeTrain.append(y_train)
-#         storePredict.append(yPredict)
-#         cnf_matrix = confusion_matrix(y_train, yPredict)
-#         FP = cnf_matrix.sum(axis=0) - np.diag(cnf_matrix) 
-#         FN = cnf_matrix.sum(axis=1) - np.diag(cnf_matrix)
-#         FP = FP.astype(float)
-#         FN = FN.astype(float)
-#         confuseFP.append(list(FP))
-#         confuseFN.append(list(FN))
-#         for tree_idx, est in enumerate(clf.estimators_):
-#             decisionPath = extractDecisionInfo(est,counterModels,tree_idx,X_train,y_train,featureNamesDuplicated,eachAlgor,feature_names=featureNames,only_leaves=True)
-#             if (roundValue == -1):
-#                 pass
-#             else:
-#                 decisionPath[0] = decisionPath[0].round(roundValue)
-#             collectDecisions.append(decisionPath[0])
-#             collectStatistics.append(decisionPath[1])
-#             sumRes = sumRes + decisionPath[2]
-#             collectLocations.append(decisionPath[3])
-#         collectDecisionsMod.append(collectDecisions)
-#         collectStatisticsMod.append(collectStatistics)
-#         collectInfoPerModel.append(sumRes)
-#         collectLocationsAll.append(collectLocations)
-#         counterModels = counterModels + 1
-
-#     collectInfoPerModelPandas = pd.DataFrame(collectInfoPerModel)
-
-#     totalfnList = []
-#     totalfpList = []
-#     numberClasses = [y_train.index(x) for x in set(y_train)]
-#     if (len(numberClasses) == 2):
-#         for index,nList in enumerate(storeTrain):
-#             fnList = []
-#             fpList = []
-#             for ind,el in enumerate(nList):
-#                 if (el==1 and storePredict[index][ind]==0):
-#                     fnList.append(ind)
-#                 elif (el==0 and storePredict[index][ind]==1):
-#                     fpList.append(ind)
-#                 else:
-#                     pass   
-#             totalfpList.append(fpList)
-#             totalfnList.append(fnList)
-#     else:
-#         for index,nList in enumerate(storeTrain):
-#             fnList = []
-#             class0fn = []
-#             class1fn = []
-#             class2fn = []
-#             for ind,el in enumerate(nList):
-#                 if (el==0 and storePredict[index][ind]==1):
-#                     class0fn.append(ind)
-#                 elif (el==0 and storePredict[index][ind]==2):
-#                     class0fn.append(ind)
-#                 elif (el==1 and storePredict[index][ind]==0):
-#                     class1fn.append(ind)
-#                 elif (el==1 and storePredict[index][ind]==2):
-#                     class1fn.append(ind)
-#                 elif (el==2 and storePredict[index][ind]==0):
-#                     class2fn.append(ind)
-#                 elif (el==2 and storePredict[index][ind]==1):
-#                     class2fn.append(ind)
-#                 else:
-#                     pass  
-#             fnList.append(class0fn)
-#             fnList.append(class1fn)
-#             fnList.append(class2fn)
-#             totalfnList.append(fnList)
-#         for index,nList in enumerate(storePredict):
-#             fpList = []
-#             class0fp = []
-#             class1fp = []
-#             class2fp = []
-#             for ind,el in enumerate(nList):
-#                 if (el==0 and storeTrain[index][ind]==1):
-#                     class0fp.append(ind)
-#                 elif (el==0 and storeTrain[index][ind]==2):
-#                     class0fp.append(ind)
-#                 elif (el==1 and storeTrain[index][ind]==0):
-#                     class1fp.append(ind)
-#                 elif (el==1 and storeTrain[index][ind]==2):
-#                     class1fp.append(ind)
-#                 elif (el==2 and storeTrain[index][ind]==0):
-#                     class2fp.append(ind)
-#                 elif (el==2 and storeTrain[index][ind]==1):
-#                     class2fp.append(ind)
-#                 else:
-#                     pass  
-#             fpList.append(class0fp)
-#             fpList.append(class1fp)
-#             fpList.append(class2fp)
-#             totalfpList.append(fpList)
-    
-#     summarizeResults = []
-#     summarizeResults = metrics.sum(axis=1)
-#     summarizeResultsFinal = []
-#     for el in summarizeResults:
-#         summarizeResultsFinal.append(round(((el * 100)/3),2))
-
-#     indices, L_sorted = zip(*sorted(enumerate(summarizeResultsFinal), key=itemgetter(1)))
-#     indexList = list(indices)
-
-#     collectDecisionsSorted = []
-#     collectStatisticsSorted = []
-#     collectLocationsAllSorted = []
-#     for el in indexList:
-#         for item in collectDecisionsMod[el]:
-#             collectDecisionsSorted.append(item)
-#         for item2 in collectStatisticsMod[el]:
-#             collectStatisticsSorted.append(item2)
-#         for item3 in collectLocationsAll[el]:
-#             collectLocationsAllSorted.append(item3)
-
-#     collectDecisionsPerModel = pd.concat(collectDecisionsSorted)
-#     collectStatisticsPerModel = pd.concat(collectStatisticsSorted)
-#     collectLocationsAllPerSorted = pd.DataFrame(collectLocationsAllSorted)
-
-#     collectDecisionsPerModel = collectDecisionsPerModel.reset_index(drop=True)
-#     collectStatisticsPerModel = collectStatisticsPerModel.reset_index(drop=True) 
-#     collectLocationsAllPerSorted = collectLocationsAllPerSorted.reset_index(drop=True) 
-#     collectDecisionsPerModel = collectDecisionsPerModel.to_json(double_precision=15)
-#     collectStatisticsPerModel = collectStatisticsPerModel.to_json(double_precision=15)
-#     collectInfoPerModelPandas = collectInfoPerModelPandas.to_json(double_precision=15)
-#     collectLocationsAllPerSorted = collectLocationsAllPerSorted.to_json(double_precision=15)
-
-#     perModelPredPandas = pd.DataFrame(perModelPrediction)
-#     perModelPredPandas = perModelPredPandas.to_json(double_precision=15)
-
-#     yPredictTestListPandas = pd.DataFrame(yPredictTestList)
-#     yPredictTestListPandas = yPredictTestListPandas.to_json(double_precision=15)
-
-#     perModelProbPandas = pd.DataFrame(perModelProb)
-#     perModelProbPandas = perModelProbPandas.to_json(double_precision=15)
-
-#     metrics = metrics.to_json(double_precision=15)
-#     # gather the results and send them back
-#     resultsAB.append(modelsIDs) # 0 17
-#     resultsAB.append(parametersPerformancePerModel) # 1 18
-#     resultsAB.append(metrics) # 2 19
-#     resultsAB.append(json.dumps(confuseFP)) # 3 20
-#     resultsAB.append(json.dumps(confuseFN)) # 4 21
-#     resultsAB.append(json.dumps(featureImp)) # 5 22
-#     resultsAB.append(json.dumps(collectDecisionsPerModel)) # 6 23
-#     resultsAB.append(perModelProbPandas) # 7 24
-#     resultsAB.append(json.dumps(perModelPredPandas)) # 8 25
-#     resultsAB.append(json.dumps(target_names)) # 9 26
-#     resultsAB.append(json.dumps(collectStatisticsPerModel)) # 10 27
-#     resultsAB.append(json.dumps(collectInfoPerModelPandas)) # 11 28
-#     resultsAB.append(json.dumps(keepOriginalFeatures)) # 12 29
-#     resultsAB.append(json.dumps(yPredictTestListPandas)) # 13 30
-#     resultsAB.append(json.dumps(collectLocationsAllPerSorted)) # 14 31
-#     resultsAB.append(json.dumps(totalfpList)) # 15 32
-#     resultsAB.append(json.dumps(totalfnList)) # 16 33
-
-#     return resultsAB
-
 
 def extractDecisionInfo(decision_tree,counterModels,tree_index,X_train,y_predict,feature_names_duplicated,listOfRules,feature_names=None,only_leaves=True):
     '''return dataframe with node info

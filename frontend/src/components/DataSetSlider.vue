@@ -3,14 +3,9 @@
       <b-col cols="4">
         <label id="data" for="param-dataset" data-toggle="tooltip" data-placement="right" title="Tip: use one of the data sets already provided or upload a new file.">{{ dataset }}</label>
         <select id="selectFile" @change="selectDataSet()">
-           <option value="HeartC.csv" >Heart Disease</option>
-            <option value="IrisC.csv">Iris Flower</option>
-            <option value="diabetesC.csv" >Indian Diabetes</option>
-            <option value="ContraceptiveC.csv" >Contraceptive</option>
-            <option value="CreditC.csv" >Credit Bank</option>
-            <option value="TitanicC.csv" >Titanic</option>
-            <option value="HappinessC.csv" >Happiness</option>
             <option value="breastC.csv" selected>Breast Cancer</option>
+            <option value="diabetesC.csv" >Indian Diabetes</option>
+            <option value="HeartC.csv" >Heart Disease</option>
         </select>
       </b-col>
       <b-col cols="4">

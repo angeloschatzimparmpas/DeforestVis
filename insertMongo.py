@@ -5,11 +5,10 @@ import pymongo
 import json
 import os
 
-
 def import_content(filepath):
     mng_client = pymongo.MongoClient('localhost', 27017)
     mng_db = mng_client['mydb']
-    collection_name = 'LUADC' 
+    collection_name = 'diabetesC' 
     db_cm = mng_db[collection_name]
     cdir = os.path.dirname(__file__)
     file_res = os.path.join(cdir, filepath)
@@ -20,5 +19,5 @@ def import_content(filepath):
     db_cm.insert_many(data_json)
 
 if __name__ == "__main__":
-  filepath = '/Users/anchaa/Documents/Research/DeforestVis_code/extra_data_sets/LUAD.csv'
+  filepath = '/path_to_the_folder/data/diabetes.csv'
   import_content(filepath)
